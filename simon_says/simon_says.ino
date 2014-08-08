@@ -6,7 +6,6 @@
  */
 
 // TODO Reset game in the middle of a game.
-// TODO Go back to light show after losing or winning a game.
 
 // Turn debug mode on or off.
 const boolean DEBUG = true;
@@ -74,41 +73,12 @@ void loop() {
 
     // Begin the game.
     playGame(pattern);
-}
 
-
-/**
- * Determine whether the player successfully matched the pattern.
- */
-boolean verifyPlayerInput(int *pattern, int currentLevel) {
-
-    // Get player input up through the current game level.
-    int lvl = 0;
-    while (lvl < currentLevel) {
-
-        // Wait for a button press.
-        int simonLed = -1;
-        while (simonLed == -1) {
-            simonLed = getSimonLed(analogRead(BUTTONS));
-        }
-
-        // Blink the corresponding LED.
-        digitalWrite(simonLed, HIGH);
-        delay(GAME_SPEED);
-        digitalWrite(simonLed, LOW);
-        delay(GAME_SPEED);
-
-        // Check if the button press was correct.
-        if (pattern[lvl] == simonLed) {
-            lvl++;
-        } else {
-            // Player input was incorrect.
-            return false;
-        }
+    // The game is over, so turn off all lights and reset the game.
+    for (int i = 0; i < QTY; i++) {
+        digitalWrite(LEDS[i], LOW);
+        gameStart = false;
     }
-
-    // The player successfully matched the pattern.
-    return true;
 }
 
 
@@ -146,7 +116,7 @@ void playGame(int *pattern) {
         // Display the pattern.
         for (int lvl = 0; lvl < currentLevel; lvl++) {
 
-            // Blink the LED.
+            // Blink the current pattern LED.
             digitalWrite(pattern[lvl], HIGH);
             delay(GAME_SPEED);
             digitalWrite(pattern[lvl], LOW);
@@ -160,6 +130,7 @@ void playGame(int *pattern) {
 
             // The player was correct; move to the next level.
             currentLevel++;
+            delay(GAME_SPEED);
 
         // The player was incorrect; subtract a life.
         } else {
@@ -217,14 +188,14 @@ void playLightShow() {
 boolean signalGameStart() {
 
     // Check the tilt switch and buttons for a new game.
-    if (digitalRead(TILT) || analogRead(BUTTONS) > 3) {
+    if (digitalRead(TILT) || (!gameStart && analogRead(BUTTONS) > 3)) {
         gameStart = true;
     }
 
     // Flash all LEDs to signal game start if appropriate.
     if (gameStart) {
 
-        // Blink lights twice.
+        // Blink all lights twice.
         for (int j = 0; j < 2; j++) {
             for (int k = 0; k < QTY; k++) {
                 digitalWrite(LEDS[k], HIGH);
@@ -242,4 +213,34 @@ boolean signalGameStart() {
 
     // The game has not begun.
     return false;
+}
+
+
+/**
+ * Determine whether the player successfully matched the pattern.
+ */
+boolean verifyPlayerInput(int *pattern, int currentLevel) {
+
+    // Get player input up through the current game level.
+    int lvl = 0;
+    while (lvl < currentLevel) {
+
+        // Wait for a button press.
+        int simonLed = -1;
+        while (simonLed == -1) {
+            simonLed = getSimonLed(analogRead(BUTTONS));
+        }
+
+        // Blink the corresponding LED.
+        digitalWrite(simonLed, HIGH);
+        delay(GAME_SPEED);
+        digitalWrite(simonLed, LOW);
+
+        // Check if the button press was correct.
+        if (pattern[lvl] == simonLed) lvl++;
+        else return false;
+    }
+
+    // The player successfully matched the pattern.
+    return true;
 }
