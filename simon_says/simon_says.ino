@@ -23,9 +23,9 @@ const int LEDS[QTY] = {RED_1, RED_2, RED_3, SIMON_1, SIMON_2, SIMON_3, SIMON_4};
 const int TILT = 10;
 const int BUTTONS = A1;
 
-// Define game settings speed.
+// Define game settings.
 const int LIGHT_DELAY = 700;
-volatile boolean gameStart = false;
+boolean gameStart = false;
 
 
 /**
@@ -39,6 +39,9 @@ void setup() {
     for (int i = 0; i < QTY; i++) {
         pinMode(LEDS[i], OUTPUT);
     }
+
+    // Set tilt switch to input mode.
+    pinMode(TILT, INPUT);
 }
 
 
@@ -47,6 +50,12 @@ void setup() {
  */
 void loop() {
 
+    // Cycle LEDs until the player starts a game while checking for game start.
+    while (!gameStart) {
+        playLightShow();  // The tilt switch starts a new game.
+    }
+
+    // Begin the game.
     // Check if a button switch was pressed.
     int simonLed = getSimonLed(analogRead(BUTTONS));
     if (DEBUG) {
@@ -54,11 +63,6 @@ void loop() {
         Serial.print(analogRead(BUTTONS));
         Serial.print(", ");
         Serial.println(simonLed);
-    }
-
-    // Cycle LEDs until the player starts a game.
-    while (!gameStart) {
-        playLightShow();
     }
 }
 
@@ -85,7 +89,7 @@ int getSimonLed(int keyVal) {
 
 
 /**
- * Cycles LEDs on and off in a decorative pattern while waiting for player input.
+ * Cycles LEDs on and off in a decorative pattern while waiting for game start.
  */
 void playLightShow() {
 
@@ -105,11 +109,48 @@ void playLightShow() {
         digitalWrite(LEDS[i], HIGH);
         digitalWrite(LEDS[last], HIGH);
 
+        // Check the tilt switch for a new game.
+        if (signalGameStart()) return;
+
         // Wait before cycling the next set of lights.
         delay(LIGHT_DELAY);
     }
 
-    // Turn off final set of lights.
+    // Turn off final LED pair.
     digitalWrite(LEDS[0], LOW);
     digitalWrite(LEDS[QTY-1], LOW);
+}
+
+
+/**
+ * Checks the switches and determines if the game should start.
+ */
+boolean signalGameStart() {
+
+    // Check the tilt switch and buttons for a new game.
+    if (digitalRead(TILT) || analogRead(BUTTONS) > 3) {
+        gameStart = true;
+    }
+
+    // Flash all LEDs to signal game start if appropriate.
+    if (gameStart) {
+
+        // Blink lights twice.
+        for (int j = 0; j < 2; j++) {
+            for (int k = 0; k < QTY; k++) {
+                digitalWrite(LEDS[k], HIGH);
+            }
+            delay(LIGHT_DELAY);
+            for (int k = 0; k < QTY; k++) {
+                digitalWrite(LEDS[k], LOW);
+            }
+            delay(LIGHT_DELAY * 2);
+        }
+
+        // Signal game start.
+        return true;
+    }
+
+    // The game has not begun.
+    return false;
 }
