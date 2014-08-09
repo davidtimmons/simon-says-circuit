@@ -5,7 +5,7 @@
  * License: MIT
  */
 
-// TODO Reset game in the middle of a game.
+// TODO Expand function comments.
 
 // Turn debug mode on or off.
 const boolean DEBUG = true;
@@ -74,7 +74,8 @@ void loop() {
     // Begin the game.
     playGame(pattern);
 
-    // The game is over, so turn off all lights and reset the game.
+    // The game is over; turn off all lights and reset.
+    delay(LIGHT_DELAY);
     for (int i = 0; i < QTY; i++) {
         digitalWrite(LEDS[i], LOW);
         gameStart = false;
@@ -111,7 +112,7 @@ void playGame(int *pattern) {
     // Set game parameters then begin.
     int lives = TOTAL_LIVES;
     int currentLevel = 1;
-    while (lives > 0 && currentLevel < TOTAL_LEVELS) {
+    while (gameStart && lives > 0 && currentLevel < TOTAL_LEVELS) {
 
         // Display the pattern.
         for (int lvl = 0; lvl < currentLevel; lvl++) {
@@ -128,6 +129,13 @@ void playGame(int *pattern) {
         // Check player input.
         if (verifyPlayerInput(pattern, currentLevel)) {
 
+            // Check for game reset.
+            if (digitalRead(TILT)) {
+                gameStart = false;
+                signalGameChange(1);
+                return;
+            }
+
             // The player was correct; move to the next level.
             currentLevel++;
             delay(GAME_SPEED);
@@ -135,14 +143,14 @@ void playGame(int *pattern) {
         // The player was incorrect; subtract a life.
         } else {
 
-            // Turn on the next red LED.
-            if (lives == TOTAL_LIVES) digitalWrite(RED_1, HIGH);
-            else if (lives == TOTAL_LIVES - 1) digitalWrite(RED_2, HIGH);
-            else if (lives == TOTAL_LIVES - 2) digitalWrite(RED_3, HIGH);
-            delay(LIGHT_DELAY);
-
             // Remove a life from the current total.
             lives--;
+
+            // Turn on the next red LED.
+            if (lives == TOTAL_LIVES - 1) digitalWrite(RED_1, HIGH);
+            else if (lives == TOTAL_LIVES - 2) digitalWrite(RED_2, HIGH);
+            else if (lives == TOTAL_LIVES - 3) digitalWrite(RED_3, HIGH);
+            delay(LIGHT_DELAY);
         }
     }
 }
@@ -169,8 +177,12 @@ void playLightShow() {
         digitalWrite(LEDS[i], HIGH);
         digitalWrite(LEDS[last], HIGH);
 
-        // Check the switches for a new game.
-        if (signalGameStart()) return;
+        // Check the tilt switch and buttons for a new game.
+        if (digitalRead(TILT) || analogRead(BUTTONS) > 3) {
+            gameStart = true;
+            signalGameChange(2);
+            return;
+        }
 
         // Wait before cycling the next set of lights.
         delay(LIGHT_DELAY);
@@ -183,36 +195,21 @@ void playLightShow() {
 
 
 /**
- * Checks the switches and determines if the game should start.
+ * Blinks all LEDs to signal a change in game state.
  */
-boolean signalGameStart() {
+void signalGameChange(int blinks) {
 
-    // Check the tilt switch and buttons for a new game.
-    if (digitalRead(TILT) || (!gameStart && analogRead(BUTTONS) > 3)) {
-        gameStart = true;
-    }
-
-    // Flash all LEDs to signal game start if appropriate.
-    if (gameStart) {
-
-        // Blink all lights twice.
-        for (int j = 0; j < 2; j++) {
-            for (int k = 0; k < QTY; k++) {
-                digitalWrite(LEDS[k], HIGH);
-            }
-            delay(LIGHT_DELAY);
-            for (int k = 0; k < QTY; k++) {
-                digitalWrite(LEDS[k], LOW);
-            }
-            delay(LIGHT_DELAY * 2);
+    // Blink all LEDs to signal a change in game state.
+    for (int j = 0; j < blinks; j++) {
+        for (int k = 0; k < QTY; k++) {
+            digitalWrite(LEDS[k], HIGH);
         }
-
-        // Signal game start.
-        return true;
+        delay(LIGHT_DELAY);
+        for (int k = 0; k < QTY; k++) {
+            digitalWrite(LEDS[k], LOW);
+        }
+        delay(LIGHT_DELAY * 2);
     }
-
-    // The game has not begun.
-    return false;
 }
 
 
@@ -228,6 +225,11 @@ boolean verifyPlayerInput(int *pattern, int currentLevel) {
         // Wait for a button press.
         int simonLed = -1;
         while (simonLed == -1) {
+
+            // Check for game reset.
+            if (digitalRead(TILT)) return true;
+
+            // Check for a button press.
             simonLed = getSimonLed(analogRead(BUTTONS));
         }
 
@@ -241,6 +243,6 @@ boolean verifyPlayerInput(int *pattern, int currentLevel) {
         else return false;
     }
 
-    // The player successfully matched the pattern.
+    // The player successfully matched the entire pattern.
     return true;
 }
