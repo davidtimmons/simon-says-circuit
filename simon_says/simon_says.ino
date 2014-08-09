@@ -74,9 +74,9 @@ void loop() {
 
     // The game is over; turn off all lights and reset.
     delay(LIGHT_DELAY);
+    gameStart = false;
     for (int i = 0; i < QTY; i++) {
         digitalWrite(LEDS[i], LOW);
-        gameStart = false;
     }
 }
 
@@ -209,12 +209,15 @@ void playLightShow() {
  */
 void signalGameChange(int blinks) {
 
-    // Blink all LEDs to signal a change in game state.
     for (int j = 0; j < blinks; j++) {
+
+        // Turn on all LEDs.
         for (int k = 0; k < QTY; k++) {
             digitalWrite(LEDS[k], HIGH);
         }
         delay(LIGHT_DELAY);
+
+        // Turn off all LEDs.
         for (int k = 0; k < QTY; k++) {
             digitalWrite(LEDS[k], LOW);
         }
