@@ -5,10 +5,8 @@
  * License: MIT
  */
 
-// TODO Expand function comments.
-
-// Turn debug mode on or off.
-const boolean DEBUG = true;
+// Turn debug mode on or off; this toggles serial monitor printing.
+const boolean DEBUG = false;
 
 // Define LED pin positions.
 const int RED_1 = 13;
@@ -85,6 +83,12 @@ void loop() {
 
 /**
  * Return the LED associated with the active button switch.
+ *
+ * Args:
+ *     keyVal: an integer from 3 to 1023 containing the analog switch value.
+ *
+ * Return:
+ *     The corresponding LED from among the colored game diodes.
  */
 int getSimonLed(int keyVal) {
 
@@ -106,6 +110,9 @@ int getSimonLed(int keyVal) {
 
 /**
  * Run the 'Simon Says' game.
+ *
+ * Args:
+ *     *pattern: a pointer to an integer array containing the game LED pattern.
  */
 void playGame(int *pattern) {
 
@@ -196,6 +203,9 @@ void playLightShow() {
 
 /**
  * Blinks all LEDs to signal a change in game state.
+ *
+ * Args:
+ *     blinks: an integer containing the number of times to blink all LEDs.
  */
 void signalGameChange(int blinks) {
 
@@ -215,6 +225,14 @@ void signalGameChange(int blinks) {
 
 /**
  * Determine whether the player successfully matched the pattern.
+ *
+ * Args:
+ *     *pattern: a pointer to an integer array containing the game LED pattern.
+ *     currentLevel: an integer specifying the current game level.
+ *
+ * Return:
+ *     A boolean signaling whether the player correctly entered the current
+ *     game pattern.
  */
 boolean verifyPlayerInput(int *pattern, int currentLevel) {
 
