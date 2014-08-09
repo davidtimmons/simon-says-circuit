@@ -59,7 +59,7 @@ void loop() {
         playLightShow();  // The tilt switch starts a new game.
     }
 
-    // Create a random 'Simon Says' pattern.
+    // Create a random "Simon Says" pattern.
     int pattern[TOTAL_LEVELS];
     for (int i = 0; i < TOTAL_LEVELS; i++) {
         int num = 1 + random(4);  // Random between [1, 4].
@@ -109,7 +109,7 @@ int getSimonLed(int keyVal) {
 
 
 /**
- * Run the 'Simon Says' game.
+ * Run the "Simon Says" game.
  *
  * Args:
  *     *pattern: a pointer to an integer array containing the game LED pattern.
