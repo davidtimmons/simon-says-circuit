@@ -5,7 +5,7 @@ _**Author:** David Timmons (http://david.timmons.io)_
 An Arduino circuit design and program that simulates the game "Simon Says".
 
 
-##Contents
+## Contents
 This _Arduino_ project is similar to the electronic memory games made popular
 in the 1980s. The program creates a randomized sequence of progressively complex
 LED flashes. A player must memorize the pattern and input the correct sequence.
@@ -15,7 +15,7 @@ three times, the game is over. The player can reset the game by moving the
 board to activate the tilt switch.
 
 
-##Components
+## Components
 _Microcontroller:_
 * (x1) _Arduino Uno_
 
@@ -36,7 +36,7 @@ _Switches:_
 * (x1) Tilt switch
 
 
-##Screenshots
+## Screenshots
 **Circuit Schematic**
 
 ![circuit schematic](https://raw.githubusercontent.com/davidtimmons/simon-says-circuit/master/simon_says/simon-says-circuit-schematic-20140808.png "'Simon Says' Circuit Schematic")
